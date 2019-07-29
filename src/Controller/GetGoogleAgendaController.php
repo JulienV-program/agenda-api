@@ -113,6 +113,7 @@ class GetGoogleAgendaController extends AbstractController
         $databaseEvents = $repository->findAll();
         foreach ($databaseEvents as $dataEvent)
         {
+            //on créé un nouvel Event google calendar en récupérant les donnée stockés en bdd
             $Gevent = new \Google_Service_Calendar_Event(array(
                 'summary' => $dataEvent->getSummary(),
                 'location' => null,
@@ -127,18 +128,14 @@ class GetGoogleAgendaController extends AbstractController
                 ),
                 'recurrence' => null,
                 'attendees' => array(
-                    array('email' => 'lpage@example.com'),
-                    array('email' => 'sbrin@example.com'),
+                    // On peut ajouter le mail du client et du pro ici
+//                    array('email' => 'lpage@example.com'),
+//                    array('email' => 'sbrin@example.com'),
                 ),
-                'reminders' => array(
-                    'useDefault' => FALSE,
-                    'overrides' => array(
-                        array('method' => 'email', 'minutes' => 24 * 60),
-                        array('method' => 'popup', 'minutes' => 10),
-                    ),
-                ),
+                'reminders' => null,
 
             ));
+            //on appel le service google et on envoie le nouvel event
             $service->events->insert($calendarId, $Gevent);
         }
 
