@@ -12,5 +12,5 @@
 /.web-server-pid
 ###< symfony/web-server-bundle ###
 
-/public/credential.json
+/public/credentials.json
 /public/token.json

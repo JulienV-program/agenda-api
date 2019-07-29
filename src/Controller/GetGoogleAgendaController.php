@@ -19,7 +19,7 @@ class GetGoogleAgendaController extends AbstractController
     {
         $client = new Google_Client();
         $client->setApplicationName('Google Calendar API PHP Quickstart');
-        $client->setScopes(\Google_Service_Calendar::CALENDAR_READONLY);
+        $client->setScopes(\Google_Service_Calendar::CALENDAR);
         $client->setAuthConfig('credentials.json');
         $client->setAccessType('offline');
         $client->setPrompt('select_account consent');
@@ -76,30 +76,17 @@ class GetGoogleAgendaController extends AbstractController
         $results = $service->events->listEvents($calendarId, $optParams);
         $events = $results->getItems();
 
+        //si la liste d'event est vide on ne fais rien
         if (empty($events)) {
             print "No upcoming events found.\n";
         } else {
-//            $newEvent = new Event();
-//            $newSerialized = serialize($events[0]);
-//            dump($newSerialized);
-//
-//            $newSerialized = str_replace('Google_Service_Calendar_Event', 'Event', $newSerialized);
-//            dump($newSerialized);
-//
-//            $goodSerialized = preg_replace_callback('!s:\d+:"(.*?)";!s', function($m) { return "s:" . strlen($m[1]) . ':"'.$m[1].'";'; }, $newSerialized);
-//            dump($goodSerialized);
-//            $newEvent = unserialize($goodSerialized);
-//            dump($newSerialized);
-//            dump($newEvent);
-//            $manager = $this->getDoctrine()->getManager();
-//            $manager->persist($newEvent);
-//            $manager->flush();
-
             print "Upcoming events:\n";
+            // pour chaque event de la liste on vérifie si un doublon existe déjà en BDD
             foreach ($events as $event) {
                 $doublon = $repository->findOneBy(['googleId' => $event->id]);
-                dump($doublon);
+//                dump($doublon);
                 dump($event);
+                //si aucun doublon n'est trouvé on ajoute l'event en BDD
                 if ($doublon === null)
                 {
                     $newEvent = new Event();
@@ -113,19 +100,53 @@ class GetGoogleAgendaController extends AbstractController
                     $newEvent->setStart( $start);
                     $newEvent->setEnd( $end);
                     $newEvent->setGoogleId($event->id);
-                    dump($newEvent);
+//                    dump($newEvent);
                     $manager = $this->getDoctrine()->getManager();
                     $manager->persist($newEvent);
                     $manager->flush();
                 }
-
-
-            }
             }
 
+
+        }
+
+        $databaseEvents = $repository->findAll();
+        foreach ($databaseEvents as $dataEvent)
+        {
+            $Gevent = new \Google_Service_Calendar_Event(array(
+                'summary' => $dataEvent->getSummary(),
+                'location' => null,
+                'description' => null,
+                'start' => array(
+                    'dateTime' => $dataEvent->getStart()->getDateTime()->format('c'),
+                    'timeZone' => null,
+                ),
+                'end' => array(
+                    'dateTime' => $dataEvent->getEnd()->getDateTime()->format('c'),
+                    'timeZone' => null,
+                ),
+                'recurrence' => null,
+                'attendees' => array(
+                    array('email' => 'lpage@example.com'),
+                    array('email' => 'sbrin@example.com'),
+                ),
+                'reminders' => array(
+                    'useDefault' => FALSE,
+                    'overrides' => array(
+                        array('method' => 'email', 'minutes' => 24 * 60),
+                        array('method' => 'popup', 'minutes' => 10),
+                    ),
+                ),
+
+            ));
+            $service->events->insert($calendarId, $Gevent);
+        }
 
             return $this->render('get_google_agenda/index.html.twig', [
                 'controller_name' => 'GetGoogleAgendaController',
+                'events' => $events,
+                'dataEvent' => $databaseEvents
+
             ]);
         }
 
