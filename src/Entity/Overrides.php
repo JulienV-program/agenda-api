@@ -82,9 +82,9 @@ class Overrides
         return $this;
     }
 
-    public function getReminder(): ?string
+    public function getReminder(): self
     {
-        return $this->reminder->getId();
+        return $this->reminder;
     }
 
     public function setReminder(?Reminder $reminder): self

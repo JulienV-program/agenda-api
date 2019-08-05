@@ -24,8 +24,10 @@
                 <th>Titre</th>
                 <th>Début</th>
                 <th>Fin</th>
+                <th>Durée</th>
+                <th>Temps libre</th>
             </tr>
-            {% for elem in dataEvent %}
+            {% for index, elem in dataEvent %}
                 <tr>
                     <td>
                         {{ elem.id }}
@@ -39,9 +41,39 @@
                     <td>
                         {{ elem.end.dateTime| date }}
                     </td>
+                    <td>
+                        {% set duration = date(elem.end.dateTime).diff(date(elem.start.dateTime)) %}
+                        {{ duration|date("%hh%im") }}
+                    </td>
+                    {% if index > 0 %}
+                    <td>
+{#                        {% set libre = date(elem.start.dateTime).diff(date(dataEvent[index - 1].end.dateTime)) %}#}
+{#                        {{ libre|date("%dJ%hh%im") }}#}
+{#                    </td>#}
+                    {% endif %}
                 </tr>
 
             {% endfor %}
         </table>
+    </div>
+
+
+    <div>
+        Event dans l'ordre :
+        {% for elem in sortEvents %}
+            {{ elem.id }} -- {{ elem.summary }} |
+        {% endfor %}
+    </div>
+    <div>
+        {% for elem in free %}
+            <div>
+                {{ elem.summary }}
+                {{ elem.start.dateTime| date }} --- {{ elem.end.dateTime| date }}
+                {% set libre = date(elem.start.dateTime).diff(date(elem.end.dateTime)) %}
+                --- {{ libre|date("%dJ%hh%im") }}
+
+            </div>
+
+        {% endfor %}
     </div>
 {% endblock %}

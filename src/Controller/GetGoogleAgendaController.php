@@ -85,7 +85,7 @@ class GetGoogleAgendaController extends AbstractController
             foreach ($events as $event) {
                 $doublon = $repository->findOneBy(['googleId' => $event->id]);
 //                dump($doublon);
-                dump($event);
+//                dump($event);
                 //si aucun doublon n'est trouvé on ajoute l'event en BDD
                 if ($doublon === null)
                 {
@@ -113,6 +113,7 @@ class GetGoogleAgendaController extends AbstractController
         $databaseEvents = $repository->findAll();
         foreach ($databaseEvents as $dataEvent)
         {
+//            $dataEvent->getStart()->getDateTime()
             //on créé un nouvel Event google calendar en récupérant les donnée stockés en bdd
             $Gevent = new \Google_Service_Calendar_Event(array(
                 'summary' => $dataEvent->getSummary(),
@@ -136,13 +137,36 @@ class GetGoogleAgendaController extends AbstractController
 
             ));
             //on appel le service google et on envoie le nouvel event
-            $service->events->insert($calendarId, $Gevent);
+//            $service->events->insert($calendarId, $Gevent);
         }
+
+            $eventByDate = $repository->findAllOrdered();
+
+            $free = [];
+        foreach ($eventByDate as $index=>$item) {
+            if ($index > 0 && $item->getStart()->getDateTime() > $eventByDate[$index - 1]->getEnd()->getDateTime()) {
+                $newEvent = new Event();
+                $newEvent->setSummary("libre");
+                $start = new Start();
+                $startDate = $eventByDate[$index - 1]->getEnd()->getDateTime();
+                $start->setDateTime($startDate);
+                $end = new End();
+                $endDate = $item->getStart()->getDateTime();
+                $end->setDateTime($endDate);
+                $newEvent->setStart( $start);
+                $newEvent->setEnd( $end);
+
+                $free[] = $newEvent;
+            }
+        }
+
 
             return $this->render('get_google_agenda/index.html.twig', [
                 'controller_name' => 'GetGoogleAgendaController',
                 'events' => $events,
-                'dataEvent' => $databaseEvents
+                'dataEvent' => $databaseEvents,
+                'sortEvents' => $eventByDate,
+                'free' => $free
 
             ]);
         }

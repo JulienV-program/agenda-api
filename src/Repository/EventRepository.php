@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Event;
+use App\Entity\Start;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -19,6 +20,16 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
+    /**
+     * @return Event[] Return an array of Event object
+     */
+    public function findAllOrdered(){
+        return $this->createQueryBuilder('e')
+            ->leftJoin('e.start', 's')
+            ->orderBy('s.dateTime')
+            ->getQuery()
+            ->getResult();
+    }
     // /**
     //  * @return Event[] Returns an array of Event objects
     //  */
@@ -34,7 +45,8 @@ class EventRepository extends ServiceEntityRepository
             ->getResult()
         ;
     }
-    */
+
+
 
     /*
     public function findOneBySomeField($value): ?Event
