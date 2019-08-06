@@ -25,7 +25,7 @@
                 <th>Début</th>
                 <th>Fin</th>
                 <th>Durée</th>
-                <th>Temps libre</th>
+                <th>User</th>
             </tr>
             {% for index, elem in dataEvent %}
                 <tr>
@@ -49,7 +49,8 @@
                     <td>
 {#                        {% set libre = date(elem.start.dateTime).diff(date(dataEvent[index - 1].end.dateTime)) %}#}
 {#                        {{ libre|date("%dJ%hh%im") }}#}
-{#                    </td>#}
+                        {{ elem.user.email }}
+                    </td>
                     {% endif %}
                 </tr>
 
@@ -76,4 +77,15 @@
 
         {% endfor %}
     </div>
+
+
+
+{#    <div>#}
+{#        {% for event in events %}#}
+{#            <div>#}
+{#                {{ event.summary }}#}
+{#                {{ event.creator.email }}#}
+{#            </div>#}
+{#        {% endfor %}#}
+{#    </div>#}
 {% endblock %}

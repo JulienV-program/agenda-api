@@ -72,6 +72,12 @@ class Event
      */
     private $reminder;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="Events")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
     public function __construct()
     {
         $this->attendees = new ArrayCollection();
@@ -213,6 +219,18 @@ class Event
     public function setGoogleId($googleId): void
     {
         $this->googleId = $googleId;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
     }
 
 

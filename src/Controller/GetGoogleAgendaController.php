@@ -5,6 +5,8 @@ namespace App\Controller;
 use App\Entity\End;
 use App\Entity\Event;
 use App\Entity\Start;
+use App\Entity\User;
+use App\Repository\UserRepository;
 use Google_Client;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,7 +17,7 @@ class GetGoogleAgendaController extends AbstractController
     /**
      * @Route("/get-agenda", name="get_google_agenda")
      */
-    public function index(EventRepository $repository)
+    public function index(EventRepository $repository, UserRepository $userRepository)
     {
         $client = new Google_Client();
         $client->setApplicationName('Google Calendar API PHP Quickstart');
@@ -89,7 +91,20 @@ class GetGoogleAgendaController extends AbstractController
                 //si aucun doublon n'est trouvé on ajoute l'event en BDD
                 if ($doublon === null)
                 {
+
+
                     $newEvent = new Event();
+
+                    if ($userRepository->findOneByEmail($event->creator->email) === null) {
+                        $user = new User();
+                        $user->setEmail($event->creator->email);
+                        $newEvent->setUser($user);
+                    } else {
+                        $user = $userRepository->findOneByEmail($event->creator->email);
+                        $newEvent->setUser($user);
+                    }
+
+
                     $newEvent->setSummary($event->summary);
                     $start = new Start();
                     $startDate = new \DateTime($event->start->dateTime);
@@ -102,6 +117,7 @@ class GetGoogleAgendaController extends AbstractController
                     $newEvent->setGoogleId($event->id);
 //                    dump($newEvent);
                     $manager = $this->getDoctrine()->getManager();
+                    $manager->persist($user);
                     $manager->persist($newEvent);
                     $manager->flush();
                 }
@@ -139,8 +155,12 @@ class GetGoogleAgendaController extends AbstractController
             //on appel le service google et on envoie le nouvel event
 //            $service->events->insert($calendarId, $Gevent);
         }
+            $startDay = new \DateTime('2019-08-06');
+            $endDay = new \DateTime('2019-08-07');
+            $eventByDate = $repository->findByDay($startDay, $endDay);
+            dump($startDay);
+            dump($endDay);
 
-            $eventByDate = $repository->findAllOrdered();
 
             $free = [];
         foreach ($eventByDate as $index=>$item) {

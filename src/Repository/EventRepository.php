@@ -30,6 +30,22 @@ class EventRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return Event[]
+     */
+    public function findByDay(\DateTime $day, \DateTime $end) {
+        return $this->createQueryBuilder('e')
+            ->leftJoin('e.start', 's')
+            ->leftJoin('e.end', 'd')
+            ->andWhere('s.dateTime >= :day')
+            ->andWhere('d.dateTime <= :end')
+            ->orderBy('s.dateTime')
+            ->setParameter('day', $day)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getResult();
+    }
     // /**
     //  * @return Event[] Returns an array of Event objects
     //  */
