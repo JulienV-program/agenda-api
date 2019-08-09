@@ -20,9 +20,10 @@ class FreeTimeController extends AbstractController
 
     public function __invoke()
     {
-        $response = $this->freeTimeHandler->handle();
+        $response = $this->freeTimeHandler->handle($_GET);
 
 
        return $this->serializer->serialize($response, 'json');
     }
 }
+
