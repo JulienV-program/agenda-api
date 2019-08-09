@@ -2,14 +2,25 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiFilter;
 use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\DateFilter;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Serializer\Annotation\MaxDepth;
+use App\Controller\FreeTimeController;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ApiResource()
+ * @ApiResource(collectionOperations={
+ *     "get",
+ *     "get_free"={
+ *         "method"="get",
+ *         "path"="/event/free",
+ *         "controller"=FreeTimeController::class,
+ *     }
+ *     })
+ * @ApiFilter(DateFilter::class, properties={"start.dateTime"})
  * @ORM\Entity(repositoryClass="App\Repository\EventRepository")
  */
 class Event
