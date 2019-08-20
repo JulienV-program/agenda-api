@@ -20,7 +20,6 @@ use Doctrine\ORM\Mapping as ORM;
  *         "controller"=FreeTimeController::class,
  *     }
  *     })
- * @ApiFilter(DateFilter::class, properties={"start.dateTime"})
  * @ORM\Entity(repositoryClass="App\Repository\EventRepository")
  */
 class Event
