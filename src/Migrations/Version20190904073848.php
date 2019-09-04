@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20190806073619 extends AbstractMigration
+final class Version20190904073848 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -28,6 +28,7 @@ final class Version20190806073619 extends AbstractMigration
         $this->addSql('CREATE TABLE recurrence (id INT AUTO_INCREMENT NOT NULL, frequence VARCHAR(255) DEFAULT NULL, count INT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE greeting (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE reminder (id INT AUTO_INCREMENT NOT NULL, userdefault TINYINT(1) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
+        $this->addSql('CREATE TABLE user (id INT AUTO_INCREMENT NOT NULL, email VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE event (id INT AUTO_INCREMENT NOT NULL, start_id INT NOT NULL, end_id INT NOT NULL, recurence_id INT DEFAULT NULL, reminder_id INT DEFAULT NULL, user_id INT NOT NULL, google_id VARCHAR(255) DEFAULT NULL, summary VARCHAR(255) DEFAULT NULL, location VARCHAR(255) DEFAULT NULL, description VARCHAR(255) DEFAULT NULL, UNIQUE INDEX UNIQ_3BAE0AA7623DF99B (start_id), UNIQUE INDEX UNIQ_3BAE0AA7E2BD8A10 (end_id), UNIQUE INDEX UNIQ_3BAE0AA75CAC579C (recurence_id), UNIQUE INDEX UNIQ_3BAE0AA7D987BE75 (reminder_id), INDEX IDX_3BAE0AA7A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('CREATE TABLE overrides (id INT AUTO_INCREMENT NOT NULL, reminder_id INT NOT NULL, method VARCHAR(255) NOT NULL, unit VARCHAR(255) NOT NULL, number INT NOT NULL, INDEX IDX_CBECDAFAD987BE75 (reminder_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB');
         $this->addSql('ALTER TABLE attendees ADD CONSTRAINT FK_C8C96B2571F7E88B FOREIGN KEY (event_id) REFERENCES event (id)');
@@ -49,6 +50,7 @@ final class Version20190806073619 extends AbstractMigration
         $this->addSql('ALTER TABLE event DROP FOREIGN KEY FK_3BAE0AA75CAC579C');
         $this->addSql('ALTER TABLE event DROP FOREIGN KEY FK_3BAE0AA7D987BE75');
         $this->addSql('ALTER TABLE overrides DROP FOREIGN KEY FK_CBECDAFAD987BE75');
+        $this->addSql('ALTER TABLE event DROP FOREIGN KEY FK_3BAE0AA7A76ED395');
         $this->addSql('ALTER TABLE attendees DROP FOREIGN KEY FK_C8C96B2571F7E88B');
         $this->addSql('DROP TABLE end');
         $this->addSql('DROP TABLE start');
@@ -56,6 +58,7 @@ final class Version20190806073619 extends AbstractMigration
         $this->addSql('DROP TABLE recurrence');
         $this->addSql('DROP TABLE greeting');
         $this->addSql('DROP TABLE reminder');
+        $this->addSql('DROP TABLE user');
         $this->addSql('DROP TABLE event');
         $this->addSql('DROP TABLE overrides');
     }
