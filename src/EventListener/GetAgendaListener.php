@@ -94,7 +94,7 @@ class GetAgendaListener implements EventSubscriberInterface
 // Print the next 10 events on the user's calendar.
         $calendarId = 'primary';
         $optParams = array(
-            'maxResults' => 10,
+            'maxResults' => 100,
             'orderBy' => 'startTime',
             'singleEvents' => true,
             'timeMin' => date('c'),

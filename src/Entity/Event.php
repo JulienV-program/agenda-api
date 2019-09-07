@@ -18,7 +18,8 @@ use Doctrine\ORM\Mapping as ORM;
  *         "method"="get",
  *         "path"="/event/free",
  *         "controller"=FreeTimeController::class,
- *     }
+ *     },
+ *     "post",
  *     })
  * @ORM\Entity(repositoryClass="App\Repository\EventRepository")
  */
