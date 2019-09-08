@@ -13,11 +13,10 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Persistence\ObjectManager;
 use Google_Client;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-
-class GetAgendaListener implements EventSubscriberInterface
+class PostAgendaListener implements EventSubscriberInterface
 {
     private $repository;
     private $userRepository;
@@ -34,11 +33,11 @@ class GetAgendaListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::REQUEST => ['getGoogle', EventPriorities::POST_WRITE],
+            KernelEvents::VIEW => ['setGoogle', EventPriorities::PRE_WRITE],
         ];
     }
 
-    public function getGoogle(RequestEvent $requestEvent): void
+    public function setGoogle(ViewEvent $event): void
     {
         $repository = $this->repository;
         $userRepository = $this->userRepository;
@@ -91,75 +90,40 @@ class GetAgendaListener implements EventSubscriberInterface
 //        $client = getClient();
         $service = new \Google_Service_Calendar($client);
 
-// Print the next 10 events on the user's calendar.
         $calendarId = 'primary';
-        $optParams = array(
-            'maxResults' => 100,
-            'orderBy' => 'startTime',
-            'singleEvents' => true,
-            'timeMin' => date('c'),
-        );
-        $results = $service->events->listEvents($calendarId, $optParams);
-        $events = $results->getItems();
 
-        //si la liste d'event est vide on ne fais rien
-        if (empty($events)) {
-//            print "No upcoming events found.\n";
-        } else {
-//            print "Upcoming events:\n";
-            // pour chaque event de la liste on vérifie si un doublon existe déjà en BDD
-            foreach ($events as $event) {
-                $doublon = $repository->findOneBy(['googleId' => $event->id]);
-//                dump($doublon);
-//                dump($event);
-                //si aucun doublon n'est trouvé on ajoute l'event en BDD
-                if ($doublon === null)
-                {
-
-
-                    $newEvent = new Event();
-
-                    if ($userRepository->findOneByEmail($event->creator->email) === null) {
-                        $user = new User();
-                        $user->setEmail($event->creator->email);
-                        $newEvent->setUser($user);
-                    } else {
-                        $user = $userRepository->findOneByEmail($event->creator->email);
-                        $newEvent->setUser($user);
-                    }
-
-
-                    $newEvent->setSummary($event->summary);
-                    $start = new Start();
-                    $startDate = new \DateTime($event->start->dateTime);
-                    $start->setDateTime($startDate);
-                    $end = new End();
-                    $endDate = new \DateTime($event->end->dateTime);
-                    $end->setDateTime($endDate);
-                    $newEvent->setStart( $start);
-                    $newEvent->setEnd( $end);
-                    $newEvent->setGoogleId($event->id);
-//                    dump($newEvent);
-                    $manager = $this->om;
-                    $manager->persist($user);
-                    $manager->persist($newEvent);
-                    $manager->flush();
-                }
-            }
-
-
-        }
-
-        $databaseEvents = $repository->findAll();
-        foreach ($databaseEvents as $dataEvent)
-        {
-            if ($dataEvent->getGoogleId() === null)
+        $dataEvent = $event->getControllerResult();
+            //on créé un nouvel Event google calendar en récupérant les donnée stockés en bdd
+            if ($dataEvent instanceof Event)
             {
-                $this->om->remove($dataEvent);
-            }
-        }
-        $this->om->flush();
+                $Gevent = new \Google_Service_Calendar_Event(array(
+                    'summary' => $dataEvent->getSummary(),
+                    'location' => null,
+                    'description' => null,
+                    'start' => array(
+                        'dateTime' => $dataEvent->getStart()->getDateTime()->format('c'),
+                        'timeZone' => null,
+                    ),
+                    'end' => array(
+                        'dateTime' => $dataEvent->getEnd()->getDateTime()->format('c'),
+                        'timeZone' => null,
+                    ),
+                    'recurrence' => null,
+                    'attendees' => array(
+                        // On peut ajouter le mail du client et du pro ici
+//                    array('email' => 'lpage@example.com'),
+//                    array('email' => 'sbrin@example.com'),
+                    ),
+                    'reminders' => null,
 
-    }
+                ));
+                //on appel le service google et on envoie le nouvel event
+                $service->events->insert($calendarId, $Gevent);
+            }
+
+
+        }
+
+
 
 }
