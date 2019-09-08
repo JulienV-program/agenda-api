@@ -92,33 +92,41 @@ class PostAgendaListener implements EventSubscriberInterface
 
         $calendarId = 'primary';
 
+
         $dataEvent = $event->getControllerResult();
             //on créé un nouvel Event google calendar en récupérant les donnée stockés en bdd
             if ($dataEvent instanceof Event)
             {
-                $Gevent = new \Google_Service_Calendar_Event(array(
-                    'summary' => $dataEvent->getSummary(),
-                    'location' => null,
-                    'description' => null,
-                    'start' => array(
-                        'dateTime' => $dataEvent->getStart()->getDateTime()->format('c'),
-                        'timeZone' => null,
-                    ),
-                    'end' => array(
-                        'dateTime' => $dataEvent->getEnd()->getDateTime()->format('c'),
-                        'timeZone' => null,
-                    ),
-                    'recurrence' => null,
-                    'attendees' => array(
-                        // On peut ajouter le mail du client et du pro ici
+                if ($event->getRequest()->getMethod() == "POST")
+                {
+                    $Gevent = new \Google_Service_Calendar_Event(array(
+                        'summary' => $dataEvent->getSummary(),
+                        'location' => null,
+                        'description' => null,
+                        'start' => array(
+                            'dateTime' => $dataEvent->getStart()->getDateTime()->format('c'),
+                            'timeZone' => null,
+                        ),
+                        'end' => array(
+                            'dateTime' => $dataEvent->getEnd()->getDateTime()->format('c'),
+                            'timeZone' => null,
+                        ),
+                        'recurrence' => null,
+                        'attendees' => array(
+                            // On peut ajouter le mail du client et du pro ici
 //                    array('email' => 'lpage@example.com'),
 //                    array('email' => 'sbrin@example.com'),
-                    ),
-                    'reminders' => null,
+                        ),
+                        'reminders' => null,
 
-                ));
-                //on appel le service google et on envoie le nouvel event
-                $service->events->insert($calendarId, $Gevent);
+                    ));
+                    //on appel le service google et on envoie le nouvel event
+                    $service->events->insert($calendarId, $Gevent);
+                } elseif ($event->getRequest()->getMethod() == "DELETE")
+                {
+                    $service->events->delete($calendarId, $dataEvent->getGoogleId());
+                }
+
             }
 
 
